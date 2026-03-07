@@ -7,5 +7,5 @@ services:
     volumes:
       - /opt/influency/vpn-admin-api:/app
     ports:
-      - "8080:8080"
+      - "18080:8080"
     restart: unless-stopped
