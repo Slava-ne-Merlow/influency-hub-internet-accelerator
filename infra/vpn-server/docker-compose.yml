@@ -3,7 +3,7 @@ version: "3.8"
 services:
   vpn-admin-api:
     build:
-      context: ../../services/vpn-admin-api
+      context: /opt/influency/vpn-admin-api
     container_name: vpn-admin-api
     network_mode: host
     restart: unless-stopped
