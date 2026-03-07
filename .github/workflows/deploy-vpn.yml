@@ -1,0 +1,39 @@
+name: Deploy VPN API
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "services/vpn-admin-api/**"
+      - "infra/vpn-server/**"
+      - ".github/workflows/deploy-vpn.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VPN_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload repo to server
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            ./ \
+            ${{ secrets.VPN_USER }}@${{ secrets.VPN_HOST }}:/opt/influency/repo/
+
+      - name: Run deploy script
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.VPN_USER }}@${{ secrets.VPN_HOST }} '
+            mkdir -p /opt/influency/repo &&
+            cd /opt/influency/repo &&
+            bash infra/vpn-server/deploy.sh
+          '

@@ -1,1 +1,11 @@
-services: {}
+services:
+  vpn-admin-api:
+    image: python:3.11-slim
+    container_name: vpn-admin-api
+    working_dir: /app
+    command: sh -c "python -m http.server 8080"
+    volumes:
+      - /opt/influency/vpn-admin-api:/app
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
