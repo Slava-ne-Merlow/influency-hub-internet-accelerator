@@ -1,0 +1,636 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VPN Admin API",
+    "summary": "Admin API for managing VLESS users in local Xray runtime.",
+    "description": "Production-friendly HTTP API used to manage Xray users and query traffic statistics. The service calls local `xray` and `grpcurl` binaries and does not expose Xray gRPC outside.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "Health check",
+        "description": "Returns service health status for deployment and monitoring checks.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "List inbound users",
+        "description": "Returns all users currently configured on inbound tag `vless-reality`.",
+        "operationId": "list_users_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "Create inbound user",
+        "description": "Adds a new VLESS user to inbound tag `vless-reality` via local Xray runtime API.",
+        "operationId": "create_user_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{email}": {
+      "delete": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "Delete inbound user",
+        "description": "Removes a user from inbound tag `vless-reality` by email.",
+        "operationId": "delete_user_users__email__delete",
+        "parameters": [
+          {
+            "description": "Unique Xray user identifier to remove.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Email",
+              "description": "Unique Xray user identifier to remove."
+            },
+            "example": "test-user",
+            "name": "email",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid email path parameter."
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/stats/users": {
+      "get": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "List users traffic stats",
+        "description": "Returns aggregated uplink and downlink traffic counters for all users.",
+        "operationId": "stats_users_stats_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersStatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/stats/users/{email}": {
+      "get": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "Get user traffic stats",
+        "description": "Returns uplink and downlink counters for a specific user.",
+        "operationId": "stats_user_stats_users__email__get",
+        "parameters": [
+          {
+            "description": "Unique Xray user identifier to query.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Email",
+              "description": "Unique Xray user identifier to query."
+            },
+            "example": "test-user",
+            "name": "email",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid email path parameter."
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/online": {
+      "get": {
+        "tags": [
+          "xray-admin"
+        ],
+        "summary": "List online users",
+        "description": "Returns all users currently reported by Xray as online.",
+        "operationId": "online_users_online_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnlineUsersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-Service-Key header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Xray command failed, timed out, or returned invalid output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ServiceKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionStatus": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operation result.",
+            "default": "ok",
+            "example": "ok"
+          }
+        },
+        "type": "object",
+        "title": "ActionStatus"
+      },
+      "CreateUserRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Email",
+            "description": "Unique user identifier in Xray. Usually mapped to your application user key.",
+            "example": "test-user-2"
+          },
+          "uuid": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F\\-]{36}$",
+            "title": "Uuid",
+            "description": "VLESS client UUID.",
+            "example": "22222222-2222-2222-2222-222222222222"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level",
+            "description": "Xray client level.",
+            "default": 0,
+            "example": 0
+          },
+          "flow": {
+            "type": "string",
+            "title": "Flow",
+            "description": "VLESS flow for the client.",
+            "default": "xtls-rprx-vision",
+            "example": "xtls-rprx-vision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "uuid"
+        ],
+        "title": "CreateUserRequest"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Human-readable error message.",
+            "example": "Xray command failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service health status.",
+            "default": "ok",
+            "example": "ok"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "OnlineUser": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Email",
+            "description": "Unique Xray user identifier.",
+            "example": "test-user"
+          },
+          "online": {
+            "type": "boolean",
+            "title": "Online",
+            "description": "Whether the user is currently online.",
+            "default": true,
+            "example": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "OnlineUser"
+      },
+      "OnlineUsersResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OnlineUser"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "OnlineUsersResponse",
+        "description": "List of online users."
+      },
+      "User": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Email",
+            "description": "Unique Xray user identifier. Used as logical user key in admin API.",
+            "example": "test-user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "User"
+      },
+      "UserStats": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Email",
+            "description": "Unique Xray user identifier.",
+            "example": "test-user"
+          },
+          "uplink": {
+            "type": "integer",
+            "title": "Uplink",
+            "description": "Total upstream traffic in bytes.",
+            "example": 123
+          },
+          "downlink": {
+            "type": "integer",
+            "title": "Downlink",
+            "description": "Total downstream traffic in bytes.",
+            "example": 456
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "uplink",
+          "downlink"
+        ],
+        "title": "UserStats"
+      },
+      "UsersResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "UsersResponse",
+        "description": "List of users configured on the target inbound."
+      },
+      "UsersStatsResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserStats"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "UsersStatsResponse",
+        "description": "Aggregated traffic stats for all users."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "ServiceKeyAuth": {
+        "type": "apiKey",
+        "description": "Shared API key for service-to-service access.",
+        "in": "header",
+        "name": "X-Service-Key"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "monitoring",
+      "description": "Operational endpoints used for health checks."
+    },
+    {
+      "name": "xray-admin",
+      "description": "User management and traffic statistics endpoints backed by local Xray runtime API."
+    }
+  ]
+}

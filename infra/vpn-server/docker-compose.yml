@@ -11,4 +11,5 @@ services:
       - XRAY_API_SERVER=127.0.0.1:10085
       - XRAY_INBOUND_TAG=vless-reality
       - XRAY_INBOUND_PORT=443
+      - VPN_ADMIN_API_KEY=${VPN_ADMIN_API_KEY}
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "18080"]
