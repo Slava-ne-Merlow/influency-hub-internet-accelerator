@@ -179,13 +179,12 @@ class AuthenticationService(
     }
 
     private fun parseInitData(initData: String): MutableMap<String, String> {
-        val decoded = URLDecoder.decode(initData, StandardCharsets.UTF_8)
-        return decoded.split("&")
+        return initData.split("&")
             .mapNotNull { pair ->
                 val idx = pair.indexOf("=")
                 if (idx <= 0) return@mapNotNull null
-                val key = pair.substring(0, idx)
-                val value = pair.substring(idx + 1)
+                val key = URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8)
+                val value = URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8)
                 key to value
             }
             .toMap(mutableMapOf())

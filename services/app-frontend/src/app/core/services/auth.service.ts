@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
 import { UserDto, UserRole } from '../models/user.model';
 import { TelegramService } from './telegram.service';
 import { API_URL } from '../tokens/api.token';
@@ -17,7 +17,10 @@ export class AuthService {
 
   login(): Observable<{accessToken: string, user: UserDto}> {
     const initData = this.tgService.initData;
-    // For local development when not in Telegram, we might need a fallback or just fail
+    if (!initData) {
+      return throwError(() => new Error('Telegram initData is empty'));
+    }
+
     return this.http.post<{accessToken: string, user: UserDto}>(`${this.apiUrl}/api/auth/telegram`, { initData }).pipe(
       tap(res => {
         localStorage.setItem(this.TOKEN_KEY, res.accessToken);
