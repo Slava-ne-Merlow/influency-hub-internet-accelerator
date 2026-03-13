@@ -302,9 +302,6 @@ class BotController(
                 val keyboard = inlineKeyboardMarkup {
                     callbackData("Статус доступа") { menuStatusCallback }
                     callbackData("Моя ссылка") { menuLinkCallback }
-                    if (supportUrl.isNotBlank()) {
-                        url("Поддержка") { supportUrl }
-                    }
                 }
                 MenuPageState(
                     text = "VPN-меню. Выберите нужный раздел.",
