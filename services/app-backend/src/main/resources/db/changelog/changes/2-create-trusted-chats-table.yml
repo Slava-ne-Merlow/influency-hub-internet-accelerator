@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2-create-trusted-chats-table
+      author: Mstislav_the
+      changes:
+        - createTable:
+            tableName: trusted_chats
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: chat_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: joined_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: approved_by
+                  type: UUID
+                  constraints:
+                    nullable: true
+              - column:
+                  name: approved_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableName: trusted_chats
+            baseColumnNames: approved_by
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_trusted_chats_approved_by
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL

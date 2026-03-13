@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/1-create-users-table.yml
+  - include:
+      file: db/changelog/changes/2-create-trusted-chats-table.yml
+  - include:
+      file: db/changelog/changes/3-create-access-requests-table.yml
+  - include:
+      file: db/changelog/changes/4-add-user-profile-fields.yml
+  - include:
+      file: db/changelog/changes/5-add-vpn-bot-access-model.yml

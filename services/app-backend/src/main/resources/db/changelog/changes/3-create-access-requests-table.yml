@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3-create-access-requests-table
+      author: Mstislav_the
+      changes:
+        - createTable:
+            tableName: access_requests
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resolved_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: resolved_by
+                  type: UUID
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableName: access_requests
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_access_requests_user_id
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: access_requests
+            baseColumnNames: resolved_by
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_access_requests_resolved_by
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
