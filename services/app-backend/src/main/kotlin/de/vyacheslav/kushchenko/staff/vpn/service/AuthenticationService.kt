@@ -54,7 +54,12 @@ class AuthenticationService(
             .toSet()
     }
 
-
+    private fun resolveRole(telegramId: Long): UserRole =
+        when {
+            ownerIds.contains(telegramId) -> UserRole.OWNER
+            adminIds.contains(telegramId) -> UserRole.ADMIN
+            else -> UserRole.USER
+        }
 
     fun register(
         telegramId: Long,
@@ -77,11 +82,7 @@ class AuthenticationService(
             tgUsername = username,
             avatarUrl = avatarUrl,
             password = passwordHash,
-            role = when {
-                ownerIds.contains(telegramId) -> UserRole.OWNER
-                adminIds.contains(telegramId) -> UserRole.ADMIN
-                else -> UserRole.USER
-            },
+            role = resolveRole(telegramId),
             manualAccessType = ManualAccessType.NONE,
             manualAccessUntil = null,
 
@@ -99,14 +100,24 @@ class AuthenticationService(
     ): User {
         val existing = userRepository.findByTelegramId(telegramId)
         if (existing != null) {
-        val updated = existing.copy(
-            firstName = firstName,
-            lastName = lastName,
-            tgUsername = username ?: existing.tgUsername,
-            avatarUrl = avatarUrl ?: existing.avatarUrl,
-            manualAccessType = existing.manualAccessType,
-            manualAccessUntil = existing.manualAccessUntil,
-        )
+            val resolvedRole = resolveRole(telegramId)
+            if (existing.role != resolvedRole) {
+                logger.info(
+                    "Updating telegram user role for telegramId={} from {} to {}",
+                    telegramId,
+                    existing.role,
+                    resolvedRole
+                )
+            }
+            val updated = existing.copy(
+                firstName = firstName,
+                lastName = lastName,
+                tgUsername = username ?: existing.tgUsername,
+                avatarUrl = avatarUrl ?: existing.avatarUrl,
+                role = resolvedRole,
+                manualAccessType = existing.manualAccessType,
+                manualAccessUntil = existing.manualAccessUntil,
+            )
 
             return userRepository.save(updated).asModel()
         }

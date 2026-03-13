@@ -270,11 +270,23 @@ class BotController(
 
     private suspend fun configurePrivateMenuButton(user: User, bot: TelegramBot, role: UserRole) {
         if ((role == UserRole.ADMIN || role == UserRole.OWNER) && adminWebAppUrl.isNotBlank()) {
+            log.info(
+                "Setting admin web app menu button for telegramId={} role={} url={}",
+                user.id,
+                role,
+                adminWebAppUrl
+            )
             val menuButton = MenuButton.WebApp("Админка", WebAppInfo(adminWebAppUrl))
             setChatMenuButton(menuButton).send(user, bot)
             return
         }
 
+        log.info(
+            "Resetting menu button to default for telegramId={} role={} hasAdminWebAppUrl={}",
+            user.id,
+            role,
+            adminWebAppUrl.isNotBlank()
+        )
         setChatMenuButton(MenuButton.Default()).send(user, bot)
     }
 
