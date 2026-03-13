@@ -2,8 +2,8 @@ FROM gradle:jdk17 AS cache
 
 WORKDIR /app
 
-COPY gradle gradle
-COPY build.gradle.kts settings.gradle.kts ./
+COPY gradle ./gradle
+COPY gradlew gradlew.bat build.gradle.kts settings.gradle.kts ./
 
 RUN gradle dependencies --no-daemon --stacktrace
 
@@ -11,14 +11,17 @@ FROM gradle:jdk17 AS builder
 
 WORKDIR /app
 
-COPY --from=cache /app/.gradle ./.gradle
-COPY --from=cache /app .
-
-COPY src src
+COPY --from=cache /app /app
+COPY src ./src
 
 RUN gradle bootJar -x test --no-daemon --stacktrace
 
+FROM eclipse-temurin:17-jre AS runtime
+
 WORKDIR /app
+
 COPY --from=builder /app/build/libs/*.jar ./app.jar
 
-CMD ["java", "-jar", "app.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
