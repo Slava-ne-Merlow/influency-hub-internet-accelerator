@@ -1,0 +1,1077 @@
+openapi: 3.0.3
+info:
+  title: Two-Sided Pages API
+  version: 1.0.4
+  description: 'API для страниц с левой/правой частью, колонками и ячейками (без records).
+
+    Обновление — по одной ячейке; получение всей страницы — одним гридом.
+
+    '
+servers:
+  - url: https://api.example.com
+security:
+  - bearerAuth: [ ]
+tags:
+  - name: Auth
+  - name: Ping
+    description: Проверка доступности сервиса (healthcheck).
+  - name: Users
+  - name: VpnAdmin
+  - name: Chats
+  - name: Groups
+  - name: Requests
+  - name: ChatRequests
+paths:
+  /api/ping:
+    get:
+      tags:
+        - Ping
+      summary: Проверить доступность сервиса
+      operationId: ping
+      responses:
+        '200':
+          description: Пинг успешен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+
+
+
+
+  /api/auth/telegram:
+    post:
+      tags:
+        - Auth
+      summary: Вход или регистрация через Telegram Mini App
+      operationId: telegramAuth
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramAuthRequest'
+      responses:
+        '200':
+          description: Пользователь успешно аутентифицирован через Telegram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Подпись Telegram initData не прошла проверку
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Некорректный формат initData
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+
+
+  /api/users/me:
+    get:
+      tags:
+        - Users
+      summary: Получить своего пользователя (включая роль)
+      description: Возвращает данные пользователя и связанные атрибуты аккаунта.
+      operationId: getMe
+      responses:
+        '200':
+          description: Успешно получен свой пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+    patch:
+      tags:
+        - Users
+      summary: Изменить своего пользователя
+      description: Обновляет только профиль пользователя (например, имя).
+      operationId: updateMe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Успешно изменен свой пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+
+  /api/users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Получить пользователя по ID
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+
+  /api/users/{id}/manual-access/grant:
+    post:
+      tags:
+        - Users
+      summary: Выдать ручной доступ пользователю
+      operationId: grantUserManualAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantManualAccessRequest'
+      responses:
+        '200':
+          description: Ручной доступ выдан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+
+  /api/users/{id}/manual-access/revoke:
+    post:
+      tags:
+        - Users
+      summary: Отозвать ручной доступ пользователя
+      operationId: revokeUserManualAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ручной доступ отозван
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Получить список пользователей
+      operationId: getUsers
+      parameters:
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+
+  /api/chats:
+    get:
+      tags:
+        - Chats
+      summary: Получить список чатов с ботом
+      operationId: getChats
+      responses:
+        '200':
+          description: Список чатов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatDto'
+
+  /api/chats/{id}/approve:
+    post:
+      tags:
+        - Chats
+      summary: Подтвердить чат
+      operationId: approveChat
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatApprovalRequest'
+      responses:
+        '200':
+          description: Чат подтвержден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/chats/{id}/reject:
+    post:
+      tags:
+        - Chats
+      summary: Отклонить чат
+      operationId: rejectChat
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Чат отклонен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/groups:
+    get:
+      tags:
+        - Groups
+      summary: Получить список групп с ботом
+      operationId: getGroups
+      responses:
+        '200':
+          description: Список групп
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatDto'
+
+  /api/groups/{id}/approve:
+    post:
+      tags:
+        - Groups
+      summary: Подтвердить группу
+      operationId: approveGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatApprovalRequest'
+      responses:
+        '200':
+          description: Группа подтверждена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/groups/{id}/reject:
+    post:
+      tags:
+        - Groups
+      summary: Отклонить группу
+      operationId: rejectGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Группа отклонена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/requests:
+    get:
+      tags:
+        - Requests
+      summary: Получить список заявок
+      operationId: getRequests
+      responses:
+        '200':
+          description: Список заявок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessRequestDto'
+
+  /api/requests/pending:
+    get:
+      tags:
+        - Requests
+      summary: Получить pending-заявки
+      operationId: getPendingRequests
+      responses:
+        '200':
+          description: Pending-заявки
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessRequestDto'
+
+  /api/requests/{id}:
+    get:
+      tags:
+        - Requests
+      summary: Получить заявку по ID
+      operationId: getRequestById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Заявка найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRequestDto'
+
+  /api/requests/{id}/approve:
+    post:
+      tags:
+        - Requests
+      summary: Одобрить заявку
+      operationId: approveRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveAccessRequestRequest'
+      responses:
+        '200':
+          description: Заявка одобрена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRequestDto'
+
+  /api/requests/{id}/reject:
+    post:
+      tags:
+        - Requests
+      summary: Отклонить заявку
+      operationId: rejectRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Заявка отклонена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRequestDto'
+
+  /api/chat-requests:
+    get:
+      tags:
+        - ChatRequests
+      summary: Получить заявки на чаты
+      operationId: getChatRequests
+      responses:
+        '200':
+          description: Список pending-заявок на чаты
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatDto'
+
+  /api/chat-requests/{id}:
+    get:
+      tags:
+        - ChatRequests
+      summary: Получить заявку на чат по ID
+      operationId: getChatRequestById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Заявка на чат найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/chat-requests/{id}/approve:
+    post:
+      tags:
+        - ChatRequests
+      summary: Одобрить заявку на чат
+      operationId: approveChatRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatApprovalRequest'
+      responses:
+        '200':
+          description: Заявка на чат одобрена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/chat-requests/{id}/reject:
+    post:
+      tags:
+        - ChatRequests
+      summary: Отклонить заявку на чат
+      operationId: rejectChatRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Заявка на чат отклонена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatDto'
+
+  /api/vpn/summary:
+    get:
+      tags:
+        - VpnAdmin
+      summary: Получить summary по VPN
+      description: Возвращает количество VPN-пользователей и количество активных онлайн-пользователей.
+      operationId: getVpnSummary
+      responses:
+        '200':
+          description: Summary по VPN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VpnSummaryDto'
+
+  /api/vpn/users:
+    get:
+      tags:
+        - VpnAdmin
+      summary: Получить VPN-пользователей со статистикой
+      description: Возвращает список VPN-пользователей с online-статусом и traffic counters.
+      operationId: getVpnUsers
+      responses:
+        '200':
+          description: Список VPN-пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VpnUserStatsDto'
+
+  /api/vpn/users/online:
+    get:
+      tags:
+        - VpnAdmin
+      summary: Получить онлайн VPN-пользователей
+      description: Возвращает список пользователей, которых Xray считает онлайн.
+      operationId: getVpnOnlineUsers
+      responses:
+        '200':
+          description: Список онлайн VPN-пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VpnOnlineUserDto'
+
+  /api/vpn/users/{email}/stats:
+    get:
+      tags:
+        - VpnAdmin
+      summary: Получить статистику VPN-пользователя
+      description: Возвращает uplink/downlink для конкретного VPN-пользователя.
+      operationId: getVpnUserStats
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Статистика VPN-пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VpnUserTrafficDto'
+
+  /api/vpn/stats/export:
+    get:
+      tags:
+        - VpnAdmin
+      summary: Экспортировать VPN-статистику
+      description: Возвращает CSV-экспорт со списком VPN-пользователей и их статистикой.
+      operationId: exportVpnStats
+      responses:
+        '200':
+          description: CSV-экспорт VPN-статистики
+          content:
+            text/csv:
+              schema:
+                type: string
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: JWT токен для аутентификации.
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    '404':
+      description: Объект(ы) не найден(ы)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+    '413':
+      description: Слишком большой запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+    '415':
+      description: Неподдерживаемый тип данных
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+  schemas:
+    RenamePageRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+
+
+    Role:
+      type: string
+      enum:
+        - OWNER
+        - ADMIN
+        - USER
+
+    ChatType:
+      type: string
+      enum:
+        - GROUP
+        - SUPERGROUP
+
+    ChatStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+
+    AccessRequestStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+
+    ManualAccessType:
+      type: string
+      enum:
+        - NONE
+        - THREE_MONTHS
+        - FOREVER
+
+    GrantableManualAccessType:
+      type: string
+      enum:
+        - THREE_MONTHS
+        - FOREVER
+
+    AccessRequestDecisionType:
+      type: string
+      enum:
+        - APPROVE_3_MONTH
+        - APPROVE_FOREVER
+        - REJECT
+
+    ApproveAccessRequestRequest:
+      type: object
+      properties:
+        decisionType:
+          $ref: '#/components/schemas/AccessRequestDecisionType'
+      required:
+        - decisionType
+
+    GrantManualAccessRequest:
+      type: object
+      properties:
+        accessType:
+          $ref: '#/components/schemas/GrantableManualAccessType'
+      required:
+        - accessType
+
+    ChatApprovalRequest:
+      type: object
+      description: Зарезервировано для будущих параметров подтверждения чата.
+      additionalProperties: false
+
+    AccessRequestDto:
+      type: object
+      description: Заявка на доступ
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/AccessRequestStatus'
+        createdAt:
+          type: string
+          format: date-time
+        decisionType:
+          $ref: '#/components/schemas/AccessRequestDecisionType'
+          nullable: true
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        resolvedBy:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+        - id
+        - userId
+        - status
+        - createdAt
+
+    ChatDto:
+      type: object
+      description: Данные чата с ботом
+      properties:
+        id:
+          type: string
+          format: uuid
+        chatId:
+          type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/ChatType'
+        title:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ChatStatus'
+        joinedAt:
+          type: string
+          format: date-time
+        initiatedBy:
+          type: string
+          format: uuid
+          nullable: true
+        initiatedByRole:
+          allOf:
+            - $ref: '#/components/schemas/Role'
+          nullable: true
+        approvedBy:
+          type: string
+          format: uuid
+          nullable: true
+        approvedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - chatId
+        - type
+        - status
+        - joinedAt
+    VpnSummaryDto:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          format: int64
+        activeUsers:
+          type: integer
+          format: int64
+      required:
+        - totalUsers
+        - activeUsers
+    VpnUserStatsDto:
+      type: object
+      properties:
+        email:
+          type: string
+        online:
+          type: boolean
+        uplink:
+          type: integer
+          format: int64
+        downlink:
+          type: integer
+          format: int64
+      required:
+        - email
+        - online
+        - uplink
+        - downlink
+    VpnOnlineUserDto:
+      type: object
+      properties:
+        email:
+          type: string
+        online:
+          type: boolean
+      required:
+        - email
+        - online
+    VpnUserTrafficDto:
+      type: object
+      properties:
+        email:
+          type: string
+        uplink:
+          type: integer
+          format: int64
+        downlink:
+          type: integer
+          format: int64
+      required:
+        - email
+        - uplink
+        - downlink
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        login:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+
+    LoginRequest:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      description: Унифицированный ответ аутентификации (подходит и для /api, и для
+        /auth).
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          nullable: true
+          description: Может отсутствовать в некоторых ответах (/api/auth/sign-in)
+        user:
+          $ref: '#/components/schemas/UserDto'
+      required:
+        - accessToken
+    UserDto:
+      type: object
+      description: Данные пользователя (API/mobile)
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID пользователя
+        telegramId:
+          type: integer
+          format: int64
+          description: telegram ID пользователя
+        firstName:
+          type: string
+        lastName:
+          type: string
+        username:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        manualAccessType:
+          $ref: '#/components/schemas/ManualAccessType'
+        manualAccessUntil:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+      required:
+        - id
+        - telegramId
+        - role
+        - firstName
+        - manualAccessType
+
+    UserUpdateRequest:
+      type: object
+      description: Запрос на обновление пользователя
+      properties:
+        name:
+          type: string
+          description: Имя пользователя
+          minLength: 1
+      required:
+        - name
+    SignInRequest:
+      type: object
+      description: Вход в аккаунт
+      properties:
+        email:
+          type: string
+          description: Уникальный логин пользователя
+          minLength: 3
+        password:
+          type: string
+          description: Пароль пользователя
+      required:
+        - email
+        - password
+    RegisterRequest:
+      type: object
+      description: Запрос на регистрацию пользователя
+      properties:
+        email:
+          type: string
+          description: Уникальный логин пользователя
+          minLength: 3
+        password:
+          type: string
+          description: Пароль пользователя
+        name:
+          type: string
+          description: Имя пользователя
+          minLength: 1
+      required:
+        - email
+        - name
+        - password
+    TelegramAuthRequest:
+      type: object
+      description: Вход в аккаунт через Telegram Mini App (передавать initData целиком)
+      properties:
+        initData:
+          type: string
+          description: Строка Telegram WebApp initData (подписанная Telegram). Отправлять как есть.
+          minLength: 1
+        clientInfo:
+          type: object
+          nullable: true
+          description: Опционально — для диагностики/аналитики. Не использовать для доверия.
+          properties:
+            platform:
+              type: string
+              nullable: true
+            version:
+              type: string
+              nullable: true
+            colorScheme:
+              type: string
+              nullable: true
+              enum: [ light, dark ]
+      required:
+        - initData
+
+
+
+
+    ChangePasswordRequest:
+      type: object
+      description: Запрос на смену пароля
+      properties:
+        oldPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+      required:
+        - newPassword
+        - oldPassword
+    StatusResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+          format: int32
+          writeOnly: true
+      required:
+        - message
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Машинный код (UNAUTHORIZED, FORBIDDEN, NOT_FOUND...)
+        message:
+          type: string
+          description: Описание ошибки
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            details:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                required:
+                  - path
+                  - message
+                properties:
+                  path:
+                    type: string
+                  message:
+                    type: string

@@ -38,11 +38,11 @@ class UserController(
     override fun updateMe(request: UserUpdateRequest): ResponseEntity<UserDto> =
         userService.update(getRequestUser().id!!, request).toDto().ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun getUserById(id: UUID): ResponseEntity<UserDto> =
         userService.getById(id).toDto().ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun grantUserManualAccess(id: UUID, grantManualAccessRequest: GrantManualAccessRequest): ResponseEntity<UserDto> {
         val accessType = ManualAccessType.valueOf(grantManualAccessRequest.accessType.name)
         if (accessType == ManualAccessType.NONE) {
@@ -59,14 +59,14 @@ class UserController(
         return updatedUser.toDto().ok()
     }
 
-//    @IsAdmin
+    @IsAdmin
     override fun revokeUserManualAccess(id: UUID): ResponseEntity<UserDto> {
         val updatedUser = userService.revokeManualAccess(id)
         telegramNotificationService.notifyManualAccessRevoked(updatedUser)
         return updatedUser.toDto().ok()
     }
 
-//    @IsAdmin
+    @IsAdmin
     override fun getUsers(ids: List<UUID>?): ResponseEntity<List<UserDto>> {
         if (ids.isNullOrEmpty()) {
             return userService.getAll().map { it.toDto() }.ok()

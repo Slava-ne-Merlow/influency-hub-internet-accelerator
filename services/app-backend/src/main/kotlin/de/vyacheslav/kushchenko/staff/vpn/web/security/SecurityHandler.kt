@@ -4,6 +4,7 @@ import de.vyacheslav.kushchenko.staff.vpn.web.response.StatusResponse
 import de.vyacheslav.kushchenko.staff.vpn.web.response.sendResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
@@ -21,7 +22,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver
 
 @Component
 class SecurityHandler(
-    @Qualifier("handlerExceptionResolver") private val resolver: HandlerExceptionResolver
+    @Qualifier("handlerExceptionResolver") private val resolver: HandlerExceptionResolver,
+    @Value("\${app.admin.webapp-url:}") private val adminWebAppUrl: String
 ) : AuthenticationEntryPoint {
     @Bean
     fun securityFilterChain(
@@ -36,11 +38,19 @@ class SecurityHandler(
 
             cors {
                 configurationSource = CorsConfigurationSource {
+                    val corsAllowedOrigins = buildList {
+                        add("https://team-02-dfafk968.hack.prodcontest.ru")
+                        add("http://localhost:5173")
+                        add("http://localhost:3000")
+                        if (adminWebAppUrl.isNotBlank()) {
+                            add(adminWebAppUrl)
+                        }
+                    }.distinct()
+
                     CorsConfiguration().applyPermitDefaultValues().apply {
                         allowedHeaders = listOf("*")
                         allowedMethods = listOf("*")
-                        allowedOrigins =
-                            listOf("https://team-02-dfafk968.hack.prodcontest.ru", "http://localhost:5173", "http://localhost:3000", "https://oexfce-109-252-169-61.ru.tuna.am")
+                        allowedOrigins = corsAllowedOrigins
                         allowCredentials = true
                     }
                 }

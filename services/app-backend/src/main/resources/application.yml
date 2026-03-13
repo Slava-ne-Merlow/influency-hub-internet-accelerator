@@ -63,7 +63,7 @@ app:
     tgids: ${OWNER_TG_IDs}
   admin:
     tgids: ${ADMIN_TG_IDs:}
-    webapp-url: https://oexfce-109-252-169-61.ru.tuna.am/
+    webapp-url: ${APP_ADMIN_WEBAPP_URL:}
   support:
     url: ${SUPPORT_URL:}
   vpn:
@@ -80,5 +80,4 @@ ktgram:
     - token: ${TELEGRAM_BOT_TOKEN:${TELEGRAM_TOKEN}}
       pckg: de.vyacheslav.kushchenko.staff.vpn.telegram
       identifier: ${TELEGRAM_USERNAME:KtGram}
-
 

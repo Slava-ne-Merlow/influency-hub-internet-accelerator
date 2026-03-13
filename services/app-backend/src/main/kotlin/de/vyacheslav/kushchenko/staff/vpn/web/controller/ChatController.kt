@@ -17,15 +17,15 @@ class ChatController(
     private val chatService: ChatService,
 ) : ChatsApi {
 
-//    @IsAdmin
+    @IsAdmin
     override fun getChats(): ResponseEntity<List<ChatDto>> =
         chatService.listChats().map { it.toDto() }.ok()
 
-//    @IsOwner
+    @IsOwner
     override fun approveChat(id: UUID, body: Any?): ResponseEntity<ChatDto> =
         chatService.approveChat(id, getRequestUser().id!!).toDto().ok()
 
-//    @IsOwner
+    @IsOwner
     override fun rejectChat(id: UUID): ResponseEntity<ChatDto> =
         chatService.rejectChat(id).toDto().ok()
 }

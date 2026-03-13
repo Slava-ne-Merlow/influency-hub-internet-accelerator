@@ -18,27 +18,27 @@ class AccessRequestController(
     private val accessRequestService: AccessRequestService,
 ) : RequestsApi {
 
-//    @IsAdmin
+    @IsAdmin
     override fun getRequests(): ResponseEntity<List<AccessRequestDto>> =
         accessRequestService.listAll().map { it.toDto() }.ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun getPendingRequests(): ResponseEntity<List<AccessRequestDto>> =
         accessRequestService.listPending().map { it.toDto() }.ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun getRequestById(id: UUID): ResponseEntity<AccessRequestDto> =
         accessRequestService.getById(id).toDto().ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun approveRequest(id: UUID, approveAccessRequestRequest: ApproveAccessRequestRequest): ResponseEntity<AccessRequestDto> =
         accessRequestService.approve(
             id = id,
-            resolvedBy = UUID.fromString("68101fb7-835a-4a75-b629-b5a08ef8376e"), //getRequestUser().id!!,
+            resolvedBy = getRequestUser().id!!,
             decisionType = AccessRequestDecisionType.valueOf(approveAccessRequestRequest.decisionType.name)
         ).toDto().ok()
 
-//    @IsAdmin
+    @IsAdmin
     override fun rejectRequest(id: UUID): ResponseEntity<AccessRequestDto> =
         accessRequestService.reject(id, getRequestUser().id!!).toDto().ok()
 }

@@ -38,6 +38,7 @@ services:
 
       OWNER_TG_IDs: ${OWNER_TG_IDs}
       ADMIN_TG_IDs: ${ADMIN_TG_IDs}
+      APP_ADMIN_WEBAPP_URL: ${APP_ADMIN_WEBAPP_URL}
 
       SUPPORT_URL: ${SUPPORT_URL}
 
