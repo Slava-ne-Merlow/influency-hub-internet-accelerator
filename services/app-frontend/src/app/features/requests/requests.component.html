@@ -1,0 +1,53 @@
+<app-page-container title="Заявки">
+  @if (isOwner) {
+    <div class="tabs-container">
+      <div class="tab" [class.active]="activeTab === 'ACCESS'" (click)="setTab('ACCESS')">Доступ</div>
+      <div class="tab" [class.active]="activeTab === 'CHATS'" (click)="setTab('CHATS')">Чаты</div>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loading-wrapper">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+  } @else {
+    <div class="requests-list">
+      @if (activeTab === 'ACCESS') {
+        @if (accessRequests.length === 0) {
+          <div class="empty-state">Нет новых заявок на доступ</div>
+        } @else {
+          @for (req of accessRequests; track req.id) {
+            <div class="request-card">
+              <div class="request-info">
+                <div class="user-id">User ID: {{ req.userId }}</div>
+                <div class="date">Создана: {{ req.createdAt | date:'short' }}</div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" (click)="approveAccess(req.id, 'APPROVE_3_MONTH')">На 3 мес</button>
+                <button class="btn btn-primary" (click)="approveAccess(req.id, 'APPROVE_FOREVER')">Навсегда</button>
+                <button class="btn btn-danger" (click)="rejectAccess(req.id)">Отклонить</button>
+              </div>
+            </div>
+          }
+        }
+      } @else if (activeTab === 'CHATS') {
+        @if (chatRequests.length === 0) {
+          <div class="empty-state">Нет новых заявок на чаты</div>
+        } @else {
+          @for (req of chatRequests; track req.id) {
+            <div class="request-card">
+              <div class="request-info">
+                <div class="title">{{ req.title || req.username || 'Без названия' }} ({{ req.type }})</div>
+                <div class="date">Создана: {{ req.joinedAt | date:'short' }}</div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" (click)="approveChat(req.id)">Одобрить</button>
+                <button class="btn btn-danger" (click)="rejectChat(req.id)">Отклонить</button>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+  }
+</app-page-container>

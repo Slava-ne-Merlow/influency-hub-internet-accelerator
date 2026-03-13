@@ -1,0 +1,37 @@
+<app-page-container title="Статистика">
+  @if (!isLoading) {
+    <div class="stats-grid">
+      <app-stats-card 
+        label="Заявки на доступ" 
+        [value]="stats.pendingRequests" 
+        icon="access_time"
+        routerLink="/requests"
+      ></app-stats-card>
+      
+      @if (isOwner) {
+        <app-stats-card 
+          label="Заявки в чаты" 
+          [value]="stats.chatRequests" 
+          icon="chat"
+          routerLink="/requests"
+          [queryParams]="{tab: 'chats'}"
+        ></app-stats-card>
+      }
+
+      <app-stats-card 
+        label="Всего пользователей" 
+        [value]="stats.users?.total || 0" 
+        icon="people"
+      ></app-stats-card>
+
+      <app-stats-card 
+        label="Активный VPN" 
+        [value]="stats.vpnSummary?.activeUsers || 0" 
+        [total]="stats.vpnSummary?.totalUsers || 0"
+        icon="vpn_key"
+      ></app-stats-card>
+    </div>
+  } @else {
+    <app-loading-spinner></app-loading-spinner>
+  }
+</app-page-container>

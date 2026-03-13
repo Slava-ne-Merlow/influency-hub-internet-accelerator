@@ -1,0 +1,11 @@
+<div class="stats-card">
+  <div class="icon-wrapper">
+    <span class="material-icons">{{ icon }}</span>
+  </div>
+  <div class="stats-content">
+    <div class="label">{{ label }}</div>
+    <div class="value">
+      {{ value }} <span *ngIf="total !== undefined" class="total">/ {{ total }}</span>
+    </div>
+  </div>
+</div>

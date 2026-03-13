@@ -1,0 +1,16 @@
+<div class="auth-init-container">
+  @if (isLoading) {
+    <div class="loading-state">
+      <app-loading-spinner></app-loading-spinner>
+      <p>Авторизация через Telegram...</p>
+    </div>
+  }
+  
+  @if (error) {
+    <div class="error-state">
+      <span class="material-icons error-icon">error_outline</span>
+      <h2>Ошибка авторизации</h2>
+      <p>Не удалось войти. Пожалуйста, попробуйте позже или проверьте соединение.</p>
+    </div>
+  }
+</div>

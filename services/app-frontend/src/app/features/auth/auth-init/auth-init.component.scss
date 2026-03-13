@@ -1,0 +1,31 @@
+.auth-init-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+}
+
+.loading-state {
+  p {
+    margin-top: 16px;
+    color: var(--tg-theme-hint-color, #999999);
+  }
+}
+
+.error-state {
+  .error-icon {
+    font-size: 64px;
+    color: #e53935;
+    margin-bottom: 16px;
+  }
+  
+  h2 {
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    color: var(--tg-theme-hint-color, #999999);
+  }
+}

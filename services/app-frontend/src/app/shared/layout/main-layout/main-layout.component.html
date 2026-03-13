@@ -1,0 +1,20 @@
+<div class="layout-wrapper">
+  <main class="content-area">
+    <router-outlet></router-outlet>
+  </main>
+  
+  <nav class="bottom-nav">
+    <a routerLink="/statistics" routerLinkActive="active" class="nav-item">
+      <span class="material-icons">bar_chart</span>
+      <span class="label">Stats</span>
+    </a>
+    <a routerLink="/requests" routerLinkActive="active" class="nav-item">
+      <span class="material-icons">inbox</span>
+      <span class="label">Requests</span>
+    </a>
+    <a routerLink="/users" routerLinkActive="active" class="nav-item">
+      <span class="material-icons">people</span>
+      <span class="label">Users</span>
+    </a>
+  </nav>
+</div>

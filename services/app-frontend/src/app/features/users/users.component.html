@@ -1,0 +1,57 @@
+<app-page-container title="Пользователи">
+  @if (!isLoading) {
+    <div class="users-container">
+      <div class="filters-section" [formGroup]="filterForm">
+        <input type="text" formControlName="search" placeholder="Поиск по имени, username, ID...">
+        
+        <div class="filter-row">
+          <select formControlName="role">
+            <option value="ALL">Все роли</option>
+            <option value="OWNER">Owner</option>
+            <option value="ADMIN">Admin</option>
+            <option value="USER">User</option>
+          </select>
+          
+          <select formControlName="access">
+            <option value="ALL">Все доступы</option>
+            <option value="ACTIVE">С доступом</option>
+            <option value="EXPIRED">Без доступа</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="users-list">
+        @for (user of (filteredUsers$ | async); track user.id) {
+          <div class="user-card">
+            <div class="user-header">
+              @if (user.avatarUrl) {
+                <div class="avatar"><img [src]="user.avatarUrl" alt=""></div>
+              } @else {
+                <div class="avatar-placeholder">{{ user.firstName ? user.firstName.charAt(0) : '?' }}</div>
+              }
+              
+              <div class="user-info">
+                <div class="name">{{ user.firstName }} {{ user.lastName }}</div>
+                @if (user.username) {
+                  <div class="username">&#64;{{ user.username }}</div>
+                }
+              </div>
+            </div>
+            <div class="user-details">
+              <div class="role-badge">{{ user.role }}</div>
+              @if (user.manualAccessType !== 'NONE') {
+                <div class="access-status">
+                  Доступ: {{ user.manualAccessType }}
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="loading-wrapper">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+  }
+</app-page-container>
