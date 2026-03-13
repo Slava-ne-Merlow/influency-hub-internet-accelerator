@@ -82,14 +82,3 @@ ktgram:
       identifier: ${TELEGRAM_USERNAME:KtGram}
 
 
-#  vless://7bd590d5-2294-402e-89bc-7aa75c8a5d66@95.81.100.139:443?type=tcp&security=reality&encryption=none&sni=www.hetzner.com&pbk=3SZ37rzJtX19QS-0W4-1MbRVnUC1SChTs19_yYOB4jw&sid=a1b2c3d4e5f6a7b8#test2
-#  vless://7bd590d5-2294-402e-89bc-7aa75c8a5d66@95.81.100.139:443?type=tcp&security=reality&encryption=none&sni=www.hetzner.com&pbk=BZxRtFoLNH-G0DQ7iwOxp2UaHofHGUOpWGVgYEmJNVo&sid=a1b2c3d4#test2
-#  vless://a93aebc3-7ffa-48fc-aeef-32d73625d589@95.81.100.139:443?security=reality&encryption=none&flow=xtls-rprx-vision&type=tcp&sni=www.hetzner.com&fp=chrome&pbk=WQfT7h-HnyjgPLQysK8Bi_3qKxNlS3vD0dqQQaIppWI&sid=a1b2c3d4#test-user
-
-
-#7bd590d5-2294-402e-89bc-7aa75c8a5d66
-#
-#PrivateKey: kICcRA4TTIMe9S8rupx48J2JaRP2S8RDsOgLR-wRD1Q
-#Password: BZxRtFoLNH-G0DQ7iwOxp2UaHofHGUOpWGVgYEmJNVo
-#Hash32: PRrBv3sy8JNSwZV7LpnAQSUd-w347cUJPnPlKrQyvvk
-#a1b2c3d4

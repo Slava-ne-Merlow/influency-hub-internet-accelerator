@@ -1,1 +1,54 @@
-services: {}
+services:
+  postgres:
+    image: postgres:16
+    container_name: influency-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app-backend:
+    build:
+      context: /opt/influency/app-backend
+    container_name: influency-app-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_JDBC_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_USERNAME: ${TELEGRAM_USERNAME}
+
+      OWNER_TG_IDs: ${OWNER_TG_IDs}
+      ADMIN_TG_IDs: ${ADMIN_TG_IDs}
+
+      SUPPORT_URL: ${SUPPORT_URL}
+
+      VPN_ADMIN_API_BASE_URL: ${VPN_ADMIN_API_BASE_URL}
+      VPN_ADMIN_API_SERVICE_KEY: ${VPN_ADMIN_API_SERVICE_KEY}
+      VPN_ADMIN_API_CONNECT_TIMEOUT: 5s
+      VPN_ADMIN_API_READ_TIMEOUT: 10s
+
+      SENTRY_DSN: ${SENTRY_DSN}
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres-data:
