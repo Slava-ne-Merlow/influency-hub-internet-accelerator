@@ -4,11 +4,20 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Union
+from urllib.parse import quote
 
 from fastapi import HTTPException, status
 
 from app.core.config import Settings
-from app.schemas import CreateUserRequest, OnlineUser, User, UserStats
+from app.schemas import (
+    CreateUserRequest,
+    CreateUserResponse,
+    CreatedUserInfo,
+    OnlineUser,
+    User,
+    UserConnectionInfo,
+    UserStats,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +108,9 @@ class XrayService:
             result.append(User(email=email))
         return result
 
-    def add_user(self, request: CreateUserRequest) -> None:
+    def add_user(self, request: CreateUserRequest) -> CreateUserResponse:
+        flow = request.flow or self.settings.xray_flow
+        connection = self._build_connection_info(request.email, request.uuid, flow)
         payload = {
             "inbounds": [
                 {
@@ -112,7 +123,7 @@ class XrayService:
                                 "id": request.uuid,
                                 "email": request.email,
                                 "level": request.level,
-                                "flow": request.flow,
+                                "flow": flow,
                             }
                         ],
                         "decryption": "none",
@@ -139,6 +150,59 @@ class XrayService:
         finally:
             if tmp_path and tmp_path.exists():
                 tmp_path.unlink(missing_ok=True)
+
+        return CreateUserResponse(
+            user=CreatedUserInfo(email=request.email, uuid=request.uuid),
+            connection=connection,
+        )
+
+    def _build_connection_info(self, email: str, user_uuid: str, flow: str) -> UserConnectionInfo:
+        missing_settings: List[str] = []
+        if not self.settings.xray_public_host:
+            missing_settings.append("XRAY_PUBLIC_HOST")
+        if self.settings.xray_public_port <= 0:
+            missing_settings.append("XRAY_PUBLIC_PORT")
+        if not self.settings.xray_reality_public_key:
+            missing_settings.append("XRAY_REALITY_PUBLIC_KEY")
+        if not self.settings.xray_reality_short_id:
+            missing_settings.append("XRAY_REALITY_SHORT_ID")
+        if not self.settings.xray_reality_sni:
+            missing_settings.append("XRAY_REALITY_SNI")
+
+        if missing_settings:
+            detail = (
+                "Missing required Xray connection settings: "
+                + ", ".join(missing_settings)
+            )
+            logger.error(detail)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=detail,
+            )
+
+        uri = self._build_vless_uri(email=email, user_uuid=user_uuid, flow=flow)
+        return UserConnectionInfo(
+            uri=uri,
+            host=self.settings.xray_public_host,
+            port=self.settings.xray_public_port,
+            sni=self.settings.xray_reality_sni,
+            public_key=self.settings.xray_reality_public_key,
+            short_id=self.settings.xray_reality_short_id,
+        )
+
+    def _build_vless_uri(self, email: str, user_uuid: str, flow: str) -> str:
+        return (
+            f"vless://{user_uuid}@{self.settings.xray_public_host}:{self.settings.xray_public_port}"
+            f"?security=reality"
+            f"&encryption=none"
+            f"&flow={quote(flow, safe='')}"
+            f"&type=tcp"
+            f"&sni={quote(self.settings.xray_reality_sni, safe='')}"
+            f"&fp={quote(self.settings.xray_fingerprint, safe='')}"
+            f"&pbk={quote(self.settings.xray_reality_public_key, safe='')}"
+            f"&sid={quote(self.settings.xray_reality_short_id, safe='')}"
+            f"#{quote(email, safe='')}"
+        )
 
     def remove_user(self, email: str) -> None:
         cmd = [

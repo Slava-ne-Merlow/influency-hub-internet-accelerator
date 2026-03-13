@@ -7,6 +7,7 @@ from app.core.config import get_settings, Settings
 from app.schemas import (
     ActionStatus,
     CreateUserRequest,
+    CreateUserResponse,
     ErrorResponse,
     HealthResponse,
     OnlineUsersResponse,
@@ -64,18 +65,17 @@ def list_users(service: XrayService = Depends(get_xray_service)) -> UsersRespons
 
 @protected_router.post(
     "/users",
-    response_model=ActionStatus,
+    response_model=CreateUserResponse,
     status_code=status.HTTP_201_CREATED,
     tags=[XRAY_TAG],
     summary="Create inbound user",
-    description="Adds a new VLESS user to inbound tag `vless-reality` via local Xray runtime API.",
+    description="Adds a new VLESS user to inbound tag `vless-reality` and returns a ready-to-use VLESS REALITY connection.",
     responses=COMMON_ERROR_RESPONSES,
 )
 def create_user(
     payload: CreateUserRequest, service: XrayService = Depends(get_xray_service)
-) -> ActionStatus:
-    service.add_user(payload)
-    return ActionStatus()
+) -> CreateUserResponse:
+    return service.add_user(payload)
 
 
 @protected_router.delete(

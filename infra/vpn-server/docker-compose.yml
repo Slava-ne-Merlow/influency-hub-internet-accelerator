@@ -11,5 +11,12 @@ services:
       - XRAY_API_SERVER=127.0.0.1:10085
       - XRAY_INBOUND_TAG=vless-reality
       - XRAY_INBOUND_PORT=443
+      - XRAY_PUBLIC_HOST=${XRAY_PUBLIC_HOST}
+      - XRAY_PUBLIC_PORT=${XRAY_PUBLIC_PORT}
+      - XRAY_REALITY_PUBLIC_KEY=${XRAY_REALITY_PUBLIC_KEY}
+      - XRAY_REALITY_SHORT_ID=${XRAY_REALITY_SHORT_ID}
+      - XRAY_REALITY_SNI=${XRAY_REALITY_SNI}
+      - XRAY_FLOW=${XRAY_FLOW:-xtls-rprx-vision}
+      - XRAY_FINGERPRINT=${XRAY_FINGERPRINT:-chrome}
       - VPN_ADMIN_API_KEY=${VPN_ADMIN_API_KEY}
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "18080"]

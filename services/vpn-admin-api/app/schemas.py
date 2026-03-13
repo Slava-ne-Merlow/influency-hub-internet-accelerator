@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -44,9 +44,9 @@ class CreateUserRequest(BaseModel):
         description="Xray client level.",
         example=0,
     )
-    flow: str = Field(
-        default="xtls-rprx-vision",
-        description="VLESS flow for the client.",
+    flow: Optional[str] = Field(
+        default=None,
+        description="Optional VLESS flow override. If omitted, service uses XRAY_FLOW.",
         example="xtls-rprx-vision",
     )
 
@@ -57,6 +57,73 @@ class ActionStatus(BaseModel):
         description="Operation result.",
         example="ok",
     )
+
+
+class CreatedUserInfo(BaseModel):
+    email: str = Field(
+        ...,
+        min_length=1,
+        description="Unique Xray user identifier.",
+        example="api-test-user",
+    )
+    uuid: str = Field(
+        ...,
+        regex=r"^[0-9a-fA-F\-]{36}$",
+        description="VLESS client UUID.",
+        example="22222222-2222-2222-2222-222222222222",
+    )
+
+
+class UserConnectionInfo(BaseModel):
+    uri: str = Field(
+        ...,
+        description="Ready-to-use VLESS REALITY URI.",
+        example=(
+            "vless://22222222-2222-2222-2222-222222222222@vpn.example.com:443"
+            "?security=reality&encryption=none&flow=xtls-rprx-vision&type=tcp"
+            "&sni=www.google.com&fp=chrome&pbk=PUBLIC_KEY&sid=abcd1234#api-test-user"
+        ),
+    )
+    host: str = Field(
+        ...,
+        min_length=1,
+        description="Public Xray host exposed to clients.",
+        example="vpn.example.com",
+    )
+    port: int = Field(
+        ...,
+        description="Public Xray port exposed to clients.",
+        example=443,
+    )
+    sni: str = Field(
+        ...,
+        min_length=1,
+        description="REALITY SNI value.",
+        example="www.google.com",
+    )
+    public_key: str = Field(
+        ...,
+        min_length=1,
+        description="REALITY public key.",
+        example="PUBLIC_KEY",
+    )
+    short_id: str = Field(
+        ...,
+        min_length=1,
+        description="REALITY short id.",
+        example="abcd1234",
+    )
+
+
+class CreateUserResponse(BaseModel):
+    status: str = Field(
+        default="ok",
+        description="Operation result.",
+        example="ok",
+    )
+    user: CreatedUserInfo
+    connection: UserConnectionInfo
+
 
 class ErrorResponse(BaseModel):
     detail: str = Field(

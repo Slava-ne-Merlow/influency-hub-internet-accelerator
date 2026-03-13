@@ -53,8 +53,8 @@ paths:
       tags:
       - xray-admin
       summary: Create inbound user
-      description: Adds a new VLESS user to inbound tag `vless-reality` via local
-        Xray runtime API.
+      description: Adds a new VLESS user to inbound tag `vless-reality` and returns
+        a ready-to-use VLESS REALITY connection.
       operationId: create_user_users_post
       requestBody:
         content:
@@ -68,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionStatus'
+                $ref: '#/components/schemas/CreateUserResponse'
         '401':
           description: Missing or invalid X-Service-Key header.
           content:
@@ -264,14 +264,49 @@ components:
         flow:
           type: string
           title: Flow
-          description: VLESS flow for the client.
-          default: xtls-rprx-vision
+          description: Optional VLESS flow override. If omitted, service uses XRAY_FLOW.
           example: xtls-rprx-vision
       type: object
       required:
       - email
       - uuid
       title: CreateUserRequest
+    CreateUserResponse:
+      properties:
+        status:
+          type: string
+          title: Status
+          description: Operation result.
+          default: ok
+          example: ok
+        user:
+          $ref: '#/components/schemas/CreatedUserInfo'
+        connection:
+          $ref: '#/components/schemas/UserConnectionInfo'
+      type: object
+      required:
+      - user
+      - connection
+      title: CreateUserResponse
+    CreatedUserInfo:
+      properties:
+        email:
+          type: string
+          minLength: 1
+          title: Email
+          description: Unique Xray user identifier.
+          example: api-test-user
+        uuid:
+          type: string
+          pattern: ^[0-9a-fA-F\-]{36}$
+          title: Uuid
+          description: VLESS client UUID.
+          example: 22222222-2222-2222-2222-222222222222
+      type: object
+      required:
+      - email
+      - uuid
+      title: CreatedUserInfo
     ErrorResponse:
       properties:
         detail:
@@ -345,6 +380,51 @@ components:
       required:
       - email
       title: User
+    UserConnectionInfo:
+      properties:
+        uri:
+          type: string
+          title: Uri
+          description: Ready-to-use VLESS REALITY URI.
+          example: vless://22222222-2222-2222-2222-222222222222@vpn.example.com:443?security=reality&encryption=none&flow=xtls-rprx-vision&type=tcp&sni=www.google.com&fp=chrome&pbk=PUBLIC_KEY&sid=abcd1234#api-test-user
+        host:
+          type: string
+          minLength: 1
+          title: Host
+          description: Public Xray host exposed to clients.
+          example: vpn.example.com
+        port:
+          type: integer
+          title: Port
+          description: Public Xray port exposed to clients.
+          example: 443
+        sni:
+          type: string
+          minLength: 1
+          title: Sni
+          description: REALITY SNI value.
+          example: www.google.com
+        public_key:
+          type: string
+          minLength: 1
+          title: Public Key
+          description: REALITY public key.
+          example: PUBLIC_KEY
+        short_id:
+          type: string
+          minLength: 1
+          title: Short Id
+          description: REALITY short id.
+          example: abcd1234
+      type: object
+      required:
+      - uri
+      - host
+      - port
+      - sni
+      - public_key
+      - short_id
+      title: UserConnectionInfo
     UserStats:
       properties:
         email:
