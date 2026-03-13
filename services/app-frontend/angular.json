@@ -65,7 +65,7 @@
           "options": {
             "host": "0.0.0.0",
             "port": 4200,
-            "allowedHosts": ["95.81.100.138"]
+            "allowedHosts": ["ceo13.fvds.ru"]
           },
           "configurations": {
             "production": {
