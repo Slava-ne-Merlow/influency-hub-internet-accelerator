@@ -65,7 +65,7 @@
           "options": {
             "host": "0.0.0.0",
             "port": 4200,
-            "allowedHosts": ["5at8f3-109-252-169-148.ru.tuna.am"]
+            "allowedHosts": ["95.81.100.138"]
           },
           "configurations": {
             "production": {

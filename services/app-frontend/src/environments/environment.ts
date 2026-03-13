@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://wxwj7z-109-252-169-148.ru.tuna.am'
+  apiUrl: 'http://95.81.100.138:8081'
 };

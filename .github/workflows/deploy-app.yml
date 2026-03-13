@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - "services/app-backend/**"
+      - "services/app-frontend/**"
       - "infra/app-server/**"
       - ".github/workflows/deploy-app.yml"
 
